@@ -1,5 +1,13 @@
 # Getting Started with Create React App
 
+## Workflow
+
+Добавил к этому проекту workflow для ci/cd.
+
+На `push` в репозиторий запускаются проверки тестов, линтеры eslint и typescript.
+
+На `push` тега, после линтеров и тестов, запускается скрипт подготовки релиза. Редактируется описание тикета в Трекере и собирается docker-образ.
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
