@@ -1,12 +1,28 @@
 # Getting Started with Create React App
 
+[![main](https://github.com/SerBEEan/infra-template/actions/workflows/main.yml/badge.svg?branch=master)](https://github.com/SerBEEan/infra-template/actions/workflows/main.yml)
+
 ## Workflow
 
 Добавил к этому проекту workflow для ci/cd.
 
 На `push` в репозиторий запускаются проверки тестов, линтеры eslint и typescript.
 
-На `push` тега, после линтеров и тестов, запускается скрипт подготовки релиза. Редактируется описание тикета в Трекере и собирается docker-образ.
+На `push` тега (`git push origin <tag_name>`), после линтеров и тестов, запускается скрипт подготовки релиза. Редактируется описание тикета в Трекере и собирается docker-образ.
+
+## Docker
+
+Сборка образа докера и запуск контейнера на порту `3000`
+
+```
+docker build -t app .
+```
+
+```
+docker run --name spa -p 3000:3000 -d app
+```
+
+----
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
