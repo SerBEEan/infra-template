@@ -2,9 +2,6 @@ import React from 'react';
 import logo from './logo.svg';
 import './App.css';
 
-let a = 2;
-a = '';
-
 function App() {
   return (
     <div className="App">
