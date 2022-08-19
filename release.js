@@ -5,7 +5,7 @@ const fetch = require('node-fetch');
 
 async function run() {
     try {
-        const { ticketId, auth_token, org_id } = process.env;
+        const { AUTH_TOKEN, ORG_ID, TICKET_ID } = process.env;
         
         const refData = github.context.ref.split('/');
         const currentReleaseNumber = getReleaseNumber(refData[refData.length - 1]);
@@ -15,9 +15,9 @@ async function run() {
         const commitLogs = await getCommandResult('git', ['log', '--pretty=format:"%h %an %s"', tag_options]);
         const prepareCommitLogs = commitLogs.split('\n').map((log) => log.replace(/"/g, '')).join('\n');
 
-        await fetch(`https://api.tracker.yandex.net/v2/issues/${ticketId}`, {
+        await fetch(`https://api.tracker.yandex.net/v2/issues/${TICKET_ID}`, {
             method: 'PATCH',
-            headers: getHeaders(auth_token, org_id),
+            headers: getHeaders(AUTH_TOKEN, ORG_ID),
             body: JSON.stringify({
                 summary: getTitle(`0.0.${currentReleaseNumber}`, new Date().toLocaleDateString()),
                 description: getDescriptions(github.context.payload.pusher.name, prepareCommitLogs),
@@ -30,9 +30,9 @@ async function run() {
             throw new Error('fail build docker image');
         }
 
-        await fetch(`https://api.tracker.yandex.net/v2/issues/${ticketId}/comments`, {
+        await fetch(`https://api.tracker.yandex.net/v2/issues/${TICKET_ID}/comments`, {
             method: 'POST',
-            headers: getHeaders(auth_token, org_id),
+            headers: getHeaders(AUTH_TOKEN, ORG_ID),
             body: JSON.stringify({
                 text: getComment(`rc-0.0.${currentReleaseNumber}`),
             }),

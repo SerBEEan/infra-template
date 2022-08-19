@@ -55,4 +55,4 @@ jobs:
           node-version: '16'
 
       - run: npm ci
-      - run: auth_token=${{secrets.OAUTH_TRACKER}} org_id=${{secrets.ORG_ID}} ticketId="INFRA-6" node ./release.js
+      - run: AUTH_TOKEN=${{secrets.OAUTH_TRACKER}} ORG_ID=${{secrets.ORG_ID}} TICKET_ID="INFRA-6" node ./release.js
