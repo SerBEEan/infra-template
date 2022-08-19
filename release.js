@@ -7,12 +7,11 @@ async function run() {
     try {
         const { ticketId, auth_token, org_id } = process.env;
         
-        const tags = (await getCommandResult('git', ['tag']))
-            .split('\n')
-            .filter((str) => str !== '');
-        const currentRelease = tags[tags.length - 1];
+        const refData = github.context.ref.split('/');
+        const currentReleaseNumber = getReleaseNumber(refData[refData.length - 1]);
+        const oldReleaseNumber = getOldReleaseNumber(currentReleaseNumber);
 
-        const tag_options = tags.length === 1 ? currentRelease : `${currentRelease}...${tags[tags.length - 2]}`;
+        const tag_options = Number(currentReleaseNumber) === 1 ? `rc-0.0.${currentReleaseNumber}` : `rc-0.0.${currentReleaseNumber}...rc-0.0.${oldReleaseNumber}`;
         const commitLogs = await getCommandResult('git', ['log', '--pretty=format:"%h %an %s"', tag_options]);
         const prepareCommitLogs = commitLogs.split('\n').map((log) => log.replace(/"/g, '')).join('\n');
 
@@ -20,12 +19,12 @@ async function run() {
             method: 'PATCH',
             headers: getHeaders(auth_token, org_id),
             body: JSON.stringify({
-                summary: getTitle(currentRelease.split('-')[1], new Date().toLocaleDateString()),
+                summary: getTitle(`0.0.${currentReleaseNumber}`, new Date().toLocaleDateString()),
                 description: getDescriptions(github.context.payload.pusher.name, prepareCommitLogs),
             }),
         });
 
-        const code = await exec.exec('docker', ['build', '-t', `app:${currentRelease}`, '.']);
+        const code = await exec.exec('docker', ['build', '-t', `app:0.0.${currentReleaseNumber}`, '.']);
 
         if (code !== 0) {
             throw new Error('fail build docker image');
@@ -35,7 +34,7 @@ async function run() {
             method: 'POST',
             headers: getHeaders(auth_token, org_id),
             body: JSON.stringify({
-                text: getComment(currentRelease),
+                text: getComment(`rc-0.0.${currentReleaseNumber}`),
             }),
         });  
     } catch (error) {
@@ -65,6 +64,16 @@ async function getCommandResult(command, args) {
     }
 
     return result;
+}
+
+function getReleaseNumber(currentTag) {
+    const tagData = currentTag.split('-');
+    const tagNumber = tagData[tagData.length - 1].split('.');
+    return tagNumber[tagNumber.length - 1];
+}
+
+function getOldReleaseNumber(currentReleaseNumber) {
+    return Number(currentReleaseNumber) - 1;
 }
 
 function getHeaders(auth_token, org_id) {
